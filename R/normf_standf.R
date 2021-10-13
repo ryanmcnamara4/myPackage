@@ -54,7 +54,7 @@ standf = function(x, na.rm = FALSE) {
     stop('Numeric vector "x" needs to have more than 1 non-missing values.')
   }
 
-  stdev = sd(x, na.rm = na.rm)
+  stdev = stats::sd(x, na.rm = na.rm)
   mean_val = mean(x, na.rm = na.rm)
 
   (x - mean_val) / stdev

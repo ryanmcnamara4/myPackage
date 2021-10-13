@@ -13,8 +13,9 @@
 #' @export
 #'
 #' @examples
-#' read_excel_allsheets('./my_file.xls', cnames = TRUE, tibble = TRUE)
-#' read_excel_allsheets('./my_file.xls')
+#' file = system.file('extdata', 'human_viruses.xls', package = 'myPackage')
+#' read_excel_allsheets(file, cnames = TRUE, tibble = TRUE)
+#' read_excel_allsheets(file)
 read_excel_allsheets = function(filepath, cnames = TRUE, tibble = FALSE) {
 
   sheets = readxl::excel_sheets(filepath)

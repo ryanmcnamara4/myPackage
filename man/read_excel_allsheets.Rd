@@ -23,6 +23,7 @@ Loads all of the sheets of the excel file \code{filepath}, and returns them as
 a list of tibbles or data.frames.
 }
 \examples{
-read_excel_allsheets('./my_file.xls', cnames = TRUE, tibble = TRUE)
-read_excel_allsheets('./my_file.xls')
+file = system.file('extdata', 'human_viruses.xls', package = 'myPackage')
+read_excel_allsheets(file, cnames = TRUE, tibble = TRUE)
+read_excel_allsheets(file)
 }
