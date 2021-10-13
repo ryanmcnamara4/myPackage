@@ -26,7 +26,7 @@ test_that('Return value is correct', {
 
   test_vec = sample(-100:100, 15, replace = FALSE)
   test_mean = mean(test_vec)
-  test_sd = sd(test_vec)
+  test_sd = stats::sd(test_vec)
 
   standf_ans = (test_vec - test_mean) / test_sd
 
