@@ -3,4 +3,5 @@
 export(codon_to_aa)
 export(normf)
 export(read_excel_allsheets)
+export(split_n_characters)
 export(standf)
