@@ -1,0 +1,136 @@
+#' Calculate the RSCU of sequence(s)
+#'
+#' @param seq Character vector, DNAString, RNAString, DNAStringSet, or RNAStringSet of sequences
+#' @param as.data.frame Logical value determining if the returned result should be a data.frame or
+#'     a tibble. Defaults to TRUE.
+#' @param seq_type Character value of either "DNA" or "RNA" depending on whether
+#'     "T" or "U" is used in the sequence.
+#'
+#' @return A data.frame or a tibble with codons as column names, sequences as rows, and the RSCUs
+#'     as the values.
+#' @export
+#'
+#' @examples
+#' seq = paste0("ATGGCGTCCCCGTCTCGGAGACTGCAGACTAAACCAGTCATTACTTGTTTC",
+#' "AAGAGCGTTCTGCTAATCTACACTTTTATTTTCTGGATCACTGGCGTTATCCTTCTTG",
+#' "CAGTTGGCATTTGGGGCAAGGTGAGCCTGGAGAATTACTTTTCTCTTTTAAATGAGAA",
+#' "GGCCACCAATGTCCCCTTCGTGCTCATTGCTACTGGTACCGTCATTATTCTTTTGGGC",
+#' "ACCTTTGGTTGTTTTGCTACCTGCCGAGCTTCTGCATGGATGCTAAAACTGTATGCAA",
+#' "TGTTTCTGACTCTCGTTTTTTTGGTCGAACTGGTCGCTGCCATCGTAGGATTTGTTTT",
+#' "CAGACATGAGATTAAGAACAGCTTTAAGAATAATTATGAGAAGGCTTTGAAGCAGTAT",
+#' "AACTCTACAGGAGATTATAGAAGCCATGCAGTAGACAAGATCCAAAATACGTTGCATT",
+#' "GTTGTGGTGTCACCGATTATAGAGATTGGACAGATACTAATTATTACTCAGAAAAAGG",
+#' "ATTTCCTAAGAGTTGCTGTAAACTTGAAGATTGTACTCCACAGAGAGATGCAGACAAA",
+#' "GTAAACAATGAAGGTTGTTTTATAAAGGTGATGACCATTATAGAGTCAGAAATGGGAG",
+#' "TCGTTGCAGGAATTTCCTTTGGAGTTGCTTGCTTCCAACTGATTGGAATCTTTCTCGC",
+#' "CTACTGCCTCTCTCGTGCCATAACAAATAACCAGTATGAGATAGTGTAA")
+#'
+#' get_rscu(seq, seq_type = 'DNA')
+#' get_rscu(Biostrings::DNAString(seq), seq_type = 'DNA')
+#' get_rscu(seq, as.data.frame = FALSE, seq_type = 'DNA')
+#'
+#' seqs = c(paste0("ATGGCGTCCCCGTCTCGGAGACTGCAGACTAAACCAGTCATTACTTGTT",
+#' "TCAAGAGCGTTCTGCTAATCTACACTTTTATTTTCTGGATCACTGGCGTTATCCTTCTT",
+#' "GCAGTTGGCATTTGGGGCAAGGTGAGCCTGGAGAATTACTTTTCTCTTTTAAATGAGAA",
+#' "GGCCACCAATGTCCCCTTCGTGCTCATTGCTACTGGTACCGTCATTATTCTTTTGGGCA",
+#' "CCTTTGGTTGTTTTGCTACCTGCCGAGCTTCTGCATGGATGCTAAAACTGTATGCAATG",
+#' "TTTCTGACTCTCGTTTTTTTGGTCGAACTGGTCGCTGCCATCGTAGGATTTGTTTTCAG",
+#' "ACATGAGATTAAGAACAGCTTTAAGAATAATTATGAGAAGGCTTTGAAGCAGTATAACT",
+#' "CTACAGGAGATTATAGAAGCCATGCAGTAGACAAGATCCAAAATACGTTGCATTGTTGT",
+#' "GGTGTCACCGATTATAGAGATTGGACAGATACTAATTATTACTCAGAAAAAGGATTTCC",
+#' "TAAGAGTTGCTGTAAACTTGAAGATTGTACTCCACAGAGAGATGCAGACAAAGTAAACA",
+#' "ATGAAGGTTGTTTTATAAAGGTGATGACCATTATAGAGTCAGAAATGGGAGTCGTTGCA",
+#' "GGAATTTCCTTTGGAGTTGCTTGCTTCCAACTGATTGGAATCTTTCTCGCCTACTGCCT",
+#' "CTCTCGTGCCATAACAAATAACCAGTATGAGATAGTGTAA"),
+#' paste0("ATGGCCTCCTTGGAAGTCAGTCGTAGTCCTCGCAGGTCTCGGCGGGAGCTGGAAGTGC",
+#' "GCAGTCCACGACAGAACAAATATTCGGTGCTTTTACCTACCTACAACGAGCGCGAGAAC",
+#' "CTGCCGCTCATCGTGTGGCTGCTGGTGAAAAGCTTCTCCGAGAGTGGAATCAACTATGA",
+#' "AATTATAATCATAGATGATGGAAGCCCAGATGGAACAAGGGATGTTGCTGAACAGTTGG",
+#' "AGAAGATCTATGGGTCAGACAGAATTCTTCTAAGACCACGAGAGAAAAAGTTGGGACTA",
+#' "GGAACTGCATATATTCATGGAATGAAACATGCCACAGGAAACTACATCATTATTATGGA",
+#' "TGCTGATCTCTCACACCATCCAAAATTTATTCCTGAATTTATTAGGAAGCAAAAGGAGG",
+#' "GTAATTTTGATATTGTCTCTGGAACTCGCTACAAAGGAAATGGAGGTGTATATGGCTGG",
+#' "GATTTGAAAAGAAAAATAATCAGTGATGGAGTTTTGCCATGTTGCCCAGGCTGGTCACT",
+#' "CCTGGGCTCAAGTGATCCAGCCATCTTGGCCTCCTGGGATTACAGCCGTGGGGCCAATT",
+#' "TTTTAACTCAGATCTTGCTGAGACCAGGAGCATCTGATTTAACAGGAAGTTTCAGATTA",
+#' "TACCGAAAAGAAGTTCTAGAGAAATTAATAGAAAAATGTGTTTCTAAAGGCTACGTCTT",
+#' "CCAGATGGAGATGATTGTTCGGGCAAGACAGTTGAATTATACTATTGGCGAGGTTCCAA",
+#' "TATCATTTGTGGATCGTGTTTATGGTGAATCCAAGTTGGGAGGAAATGAAATAGTATCT",
+#' "TTCTTGAAAGGATTATTGACTCTTTTTGCTACTACATAA"))
+#'
+#' get_rscu(seqs, seq_type = 'DNA')
+get_rscu = function(seq, seq_type = c('DNA', 'RNA'), as.data.frame = TRUE) {
+
+  if (!(class(seq) %in% c('character', 'DNAString', 'RNAString', 'DNAStringSet', 'RNAStringSet'))) {
+
+    stop('"seq" needs to be a character vector, a XString, or a XStringSet.')
+
+  }
+
+  if (length(seq_type) > 1) stop('"seq_type" should be either "DNA" or "RNA".')
+  if (seq_type == 'DNA') {
+    seq = Biostrings::DNAStringSet(seq)
+  } else if (seq_type == 'RNA') {
+    seq = Biostrings::RNAStringSet(seq)
+  } else {
+    stop('"seq_type" should be either "DNA" or "RNA".')
+  }
+
+  if (!all(Biostrings::width(seq) %% 3 == 0)) {
+    warning('Not all sequences are divisible by 3.')
+  }
+
+  codons = Biostrings::trinucleotideFrequency(seq, step = 3)
+  amino_acids = codon_to_aa(colnames(codons), seq_type = seq_type)
+
+  rscu = sapply(1:64, function(x) calc_rscu_helper(x, seq_type = seq_type))
+  if ('numeric' %in% class(rscu)) {
+    rscu = t(as.matrix(rscu))
+  }
+
+  colnames(rscu) = colnames(codons)
+
+  if (as.data.frame) {
+    rscu = as.data.frame(rscu)
+  }
+
+  return(rscu)
+
+}
+
+calc_rscu_helper = function(x, seq_type) {
+
+  with(parent.frame(), {
+
+    if (seq_type == 'DNA') {
+      SYNONYMOUS_CODONS = SYNONYMOUS_CODONS_DNA
+    } else {
+      SYNONYMOUS_CODONS = SYNONYMOUS_CODONS_RNA
+    }
+
+    codon = colnames(codons)[x]
+    aa = amino_acids[x]
+    syn_codons = SYNONYMOUS_CODONS[[aa]]
+
+    if (length(syn_codons) > 1) {
+      if (length(seq) == 1) {
+        aa_total = sum(codons[, syn_codons])
+      } else {
+        aa_total = rowSums(codons[, syn_codons])
+      }
+    } else {
+      aa_total = codons[, syn_codons]
+    }
+
+    codon_rscu = length(syn_codons) * codons[, codon] / aa_total
+
+    return(codon_rscu)
+
+  })
+
+}
+
+
+
+
+
