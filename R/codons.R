@@ -1,5 +1,5 @@
 # List of synonymous codons
-SYNONYMOUS_CODONS <- list(
+SYNONYMOUS_CODONS_DNA <- list(
   Phe = c("TTT", "TTC"),
   Leu = c("TTA", "TTG", "CTT", "CTC", "CTA", "CTG"),
   Ile = c("ATT", "ATC", "ATA"),
@@ -24,7 +24,7 @@ SYNONYMOUS_CODONS <- list(
 )
 
 # Character vector of all codons
-ALL_CODONS = c("AAA", "AAC", "AAG", "AAT", "ACA", "ACC", "ACG", "ACT", "AGA",
+ALL_CODONS_DNA = c("AAA", "AAC", "AAG", "AAT", "ACA", "ACC", "ACG", "ACT", "AGA",
                "AGC", "AGG", "AGT", "ATA", "ATC", "ATG", "ATT", "CAA", "CAC",
                "CAG", "CAT", "CCA", "CCC", "CCG", "CCT", "CGA", "CGC", "CGG",
                "CGT", "CTA", "CTC", "CTG", "CTT", "GAA", "GAC", "GAG", "GAT",
@@ -32,4 +32,7 @@ ALL_CODONS = c("AAA", "AAC", "AAG", "AAT", "ACA", "ACC", "ACG", "ACT", "AGA",
                "GTC", "GTG", "GTT", "TAA", "TAC", "TAG", "TAT", "TCA", "TCC",
                "TCG", "TCT", "TGA", "TGC", "TGG", "TGT", "TTA", "TTC", "TTG",
                "TTT")
+
+SYNONYMOUS_CODONS_RNA = sapply(SYNONYMOUS_CODONS_DNA, function(x) stringr::str_replace_all(x, 'T', 'U'))
+ALL_CODONS_RNA = stringr::str_replace_all(ALL_CODONS_DNA, 'T', 'U')
 

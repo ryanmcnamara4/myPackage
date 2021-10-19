@@ -4,10 +4,13 @@
 \alias{codon_to_aa}
 \title{Convert codons to amino acids}
 \usage{
-codon_to_aa(x)
+codon_to_aa(x, seq_type = c("DNA", "RNA"))
 }
 \arguments{
 \item{x}{Character vector of three nucleotide codons}
+
+\item{seq_type}{Character value of either "DNA" or "RNA" depending on whether
+"T" or "U" is used in the sequence.}
 }
 \value{
 Character vector of amino acids
@@ -18,6 +21,8 @@ Useful for creating an amino acid column from a column of codons, in order to
 facet a plot for example.
 }
 \examples{
-codon_to_aa(c('CAT', 'GAC', 'TTT', 'ATG'))
-codon_to_aa('GAT')
+codon_to_aa(c('CAT', 'GAC', 'TTT', 'ATG'), seq_type = 'DNA')
+codon_to_aa('GAT', seq_type = 'DNA')
+codon_to_aa(c('CAU', 'GAC', 'UUU', 'AUG'), seq_type = 'RNA')
+codon_to_aa('GAU', seq_type = 'RNA')
 }
